@@ -3,9 +3,9 @@ import requests
 import re
 
 # Sample of Grocery Merchants
-MERCHANTS = ['Loblaw', 'Walmart', 'Metro', 'Costco', 'Freshco', 'NoFrills', 'FoodBasics', 'Independent', 'Zehrs']
+MERCHANTS = ['Loblaw', 'Walmart', 'Metro', 'Costco', 'Freshco', 'NoFrills', 'FoodBasics', 'Independent', 'Zehrs','ShoppersDrugMart', 'ValuMart', 'Sobeys', 'IGA']
 # Random Sample of locations across Ontario
-LOCATION = ['K1G5P9','N2M 2B3', 'L1E2B4']
+LOCATION = ['K1G5P9','N2M2B3', 'L1E2B4']
 
 def get_flyer_data(location, merchant):
     req = requests.get('https://backflipp.wishabi.com/flipp/items/search?locale=en-ca&postal_code='+ location +'&q=' + merchant)
@@ -14,7 +14,7 @@ def get_flyer_data(location, merchant):
 
 def open_file_write_headers():
     f = open("results.tsv", "a", encoding="utf-8")
-    f.write("Flyer Item" + "\t" + "Price" + "\t" + " Classification Result" + "\t" + " Prediction Confidence"  + "\n")
+    f.write("Merchant" + "\t" + "Flyer Item" + "\t" + "Price" + "\t" + " Classification Result" + "\t" + " Prediction Confidence"  + "\n")
     return f
 
 def close_file(file):
@@ -24,6 +24,7 @@ def test(test, file):
     for i in test:
         product = i['name'].upper()
         price = i['current_price']
+        merchant = i['merchant_name']
 
         '''Only classify products that are priced per weight (pounds / kilos)
            This will help eliminate many products that are non-meats or prepackaged'''
@@ -38,15 +39,15 @@ def test(test, file):
             full_price = None
 
         ''' Run classification, check accuracy, produce report'''
-        
+
         if full_price != None:
                 result = cl.classify(product)
                 accuracy = cl.prob_classify(product)
-                file.write(str(product) + "\t" + str(full_price) + "\t" + str(result) + "\t" + str(accuracy.prob(result)) + "\n")
+                file.write(str(merchant) + '\t' +str(product) + "\t" + str(full_price) + "\t" + str(result) + "\t" + str(accuracy.prob(result)) + "\n")
 
 if __name__ == "__main__":
-    # Train the model
-    with open('Data//training_data.json', 'r') as fp:
+    # Train the model and split into appropriate meat categories.
+    with open('Data//broad_classifications.json', 'r') as fp:
         cl = NaiveBayesClassifier(fp, format="json")
 
     # Open Results File
