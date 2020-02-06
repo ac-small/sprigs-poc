@@ -1,10 +1,11 @@
 from textblob.classifiers import NaiveBayesClassifier
 import requests
+import re
 
 # Sample of Grocery Merchants
-MERCHANTS = ['Loblaw', 'Walmart', 'Metro', 'Costco', 'Freshco', 'NoFrills', 'FoodBasics', 'Independent']
-# Random Sample of locations across Canada
-LOCATION = ['K1G5P9','T5J0N3', 'B3H1A4']
+MERCHANTS = ['Loblaw', 'Walmart', 'Metro', 'Costco', 'Freshco', 'NoFrills', 'FoodBasics', 'Independent', 'Zehrs']
+# Random Sample of locations across Ontario
+LOCATION = ['K1G5P9','N2M 2B3', 'L1E2B4']
 
 def get_flyer_data(location, merchant):
     req = requests.get('https://backflipp.wishabi.com/flipp/items/search?locale=en-ca&postal_code='+ location +'&q=' + merchant)
@@ -12,8 +13,8 @@ def get_flyer_data(location, merchant):
     return res
 
 def open_file_write_headers():
-    f = open("results.tsv", "a")
-    f.write("Flyer Item" + "\t" + " Classification Result" + "\t" + " Prediction Confidence"  + "\n")
+    f = open("results.tsv", "a", encoding="utf-8")
+    f.write("Flyer Item" + "\t" + "Price" + "\t" + " Classification Result" + "\t" + " Prediction Confidence"  + "\n")
     return f
 
 def close_file(file):
@@ -22,9 +23,26 @@ def close_file(file):
 def test(test, file):
     for i in test:
         product = i['name'].upper()
-        result = cl.classify(product)
-        accuracy = cl.prob_classify(product)
-        file.write(str(product) + "\t" + str(result) + "\t" + str(accuracy.prob(result)) + "\n")
+        price = i['current_price']
+
+        '''Only classify products that are priced per weight (pounds / kilos)
+           This will help eliminate many products that are non-meats or prepackaged'''
+
+        if i['post_price_text'] != None:
+            units = i['post_price_text'].lower()
+            if re.search('/lb|/kg$', units):
+                full_price = str(price) + str(units)
+            else:
+                full_price = None
+        else:
+            full_price = None
+
+        ''' Run classification, check accuracy, produce report'''
+        
+        if full_price != None:
+                result = cl.classify(product)
+                accuracy = cl.prob_classify(product)
+                file.write(str(product) + "\t" + str(full_price) + "\t" + str(result) + "\t" + str(accuracy.prob(result)) + "\n")
 
 if __name__ == "__main__":
     # Train the model
@@ -39,6 +57,6 @@ if __name__ == "__main__":
         for mer in MERCHANTS:
             data = get_flyer_data(loc,mer)
             test(data, file)
-            
+
     # Close the File        
     close_file(file)
