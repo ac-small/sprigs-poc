@@ -30,7 +30,7 @@ def test(test, file):
 
         if i['post_price_text'] != None:
             units = i['post_price_text'].lower()
-            if re.search('/lb|/kg$', units):
+            if re.search('lb|kg$', units):
                 full_price = str(price) + str(units)
             else:
                 full_price = None
