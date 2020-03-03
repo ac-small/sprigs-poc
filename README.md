@@ -1,10 +1,8 @@
 # sprigs-poc
 
 Initial Investigation of SPRIGS PoC.
-This script uses the Flipp API to gather product information spanning over a sample of areas in Canada.
-
-Data classification is done with the help of the textblob library (https://pypi.org/project/textblob/)
+This script uses the Flipp API to scrape product information within a 50km radius of downtown Ottawa, and store the data in a postgresql db.
 
 Dev Requirements:
 - Python 3.7
-- pip install textblob
+- pip install psycopg2

@@ -1,8 +1,0 @@
- [
-    {"text": "CHICKEN", "label": "chicken"},
-    {"text": "BEEF STEAK", "label": "beef"},
-    {"text": "SIRLOIN STEAKS", "label": "beef"},
-    {"text": "PORK", "label": "pork"},
-    {"text": "TURKEY", "label": "turkey"},
-    {"text": "LAMB", "label": "lamb"}
-]
