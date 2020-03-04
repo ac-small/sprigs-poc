@@ -11,6 +11,7 @@ CREATE TABLE public.flyer_item
     merchant character varying(100) COLLATE pg_catalog."default",
     end_date date,
     id bigint NOT NULL DEFAULT nextval('flyer_item_id_seq'::regclass),
+    classification character varying(150) COLLATE pg_catalog."default",
     CONSTRAINT pk_id PRIMARY KEY (id)
 )
 WITH (
