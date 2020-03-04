@@ -1,6 +1,6 @@
 #!/usr/bin/python
-import psycopg2
-from config import config
+from db_conn import connect
+from db_conn import close
 import requests
 import re
 
@@ -35,36 +35,15 @@ def get_data():
                 # add each row to product list for insert
                 product_list.append((price_units, start_date, sale_price, product_name, merchant, end_date))
 
-
-def db_insert(products):
-    """ Connect to the PostgreSQL database server """
-    conn = None
-    try:
-        # read connection parameters
-        params = config()
- 
-        # connect to the PostgreSQL server
-        print('Connecting to the PostgreSQL database...')
-        conn = psycopg2.connect(**params)
-      
-        # create a cursor
-        cur = conn.cursor()
-        
-        # execute insert statement
-        cur.executemany("INSERT INTO flyer_item VALUES(%s,%s,%s,%s,%s,%s)", products)
-
-        # commit the changes to db
-        conn.commit()
-       
-        # close the communication with the PostgreSQL
-        cur.close()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        if conn is not None:
-            conn.close()
-            print('Database connection closed.')
+def insert_data(cursor, connection, products):
+    # execute insert statement
+    cursor.executemany("INSERT INTO flyer_item VALUES(%s,%s,%s,%s,%s,%s)", products)
+    # commit the changes to db
+    connection.commit()
 
 if __name__ == "__main__":
+    # gather data, connect to db, insert data, terminate db connection
     get_data()
-    db_insert(product_list)
+    cursor, connection = connect()
+    insert_data(cursor, connection, product_list)
+    close(cursor, connection)
